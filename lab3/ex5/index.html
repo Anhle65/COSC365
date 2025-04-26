@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Application</title>
+</head>
+<body>
+    <div id="root">
+    </div>
+    <a href="conversation.html">Go to Conversations</a>
+    <!-- Import the React, React-Dom and Babel libraries from unpkg -->
+    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script> <!--Note:
+    development versions of react-->
+    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    <script type="application/javascript" src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/babel">
+        const rootElement = document.getElementById('root');
+        const UserList = () => {
+            const [users, setUsers] = React.useState([])
+            const [username, setUsername] = React.useState("")
+            const list_of_users = () => {
+                return users.map((item) =>
+                    <li key = {item.user_id}>
+                        <p>
+                            {item.username}
+                            <button onClick={() => deleteUser(item)}>Delete</button>
+                        </p>
+                    </li>)
+            }
+            const updateUsernameState = (event) => {
+                setUsername(event.target.value)
+            }
+            React.useEffect(() => {
+                const getUsers = () => {
+                    axios.get('http://localhost:3000/api/users')
+                        .then((response) => {
+                            console.log(response.data)
+                            setUsers(response.data)
+                        }, (error) => {
+                            console.log(error)
+                        })
+                    }
+                    getUsers()
+                }, []) // empty array so effect only runs once
+            const addUser = () => {
+                event.preventDefault(); // stop page reloading automatically so post request has chance to complete on Firefox
+                if (username === "") {
+                    alert("Please enter a username!")
+                } else {
+                    axios.post('http://localhost:3000/api/users', { "username": username })
+                        .then(() => location.reload());
+                }
+            }
+            const deleteUser = (user) => {
+                axios.delete('http://localhost:3000/api/users/' + user.user_id)
+                    .then((response) => {
+                    setUsers(users.filter(u => u.user_id != user.user_id))
+                    })
+                }
+            return (
+                <div>
+                    <h1>Users</h1>
+                    <ul>
+                        {list_of_users()}
+                    </ul>
+                    <h2>Add a new user:</h2>
+                    <form onSubmit={addUser}>
+                    <input type="text" value={username} onChange={updateUsernameState}/>
+                    <input type="submit" value="Submit"/>
+                    </form>
+                </div>
+            )
+        }
+
+        // const ConversationList = () => {
+        //     const [conversations, setConversation] = React.useState([])
+        //     const [convo_name, setConversationname] = React.useState("")
+        //     const list_of_conversation = () => {
+        //         return conversations.map((item) =>
+        //             <li key = {item.convo_id}>
+        //                 <p>
+        //                     {item.convo_name}
+        //                     <button onClick={() => deleteConversation(item)}>Delete</button>
+        //                 </p>
+        //             </li>)
+        //     }
+        //     const updateConversationnameState = (event) => {
+        //         setConversationname(event.target.value)
+        //     }
+        //     React.useEffect(() => {
+        //         const getConversations = () => {
+        //             axios.get('http://localhost:3000/api/conversations')
+        //                 .then((response) => {
+        //                     console.log(response.data)
+        //                     setConversation(response.data)
+        //                 }, (error) => {
+        //                     console.log(error)
+        //                 })
+        //         }
+        //         getConversations()
+        //     }, []) // empty array so effect only runs once
+        //     const addConversation = (event) => {
+        //         event.preventDefault(); // stop page reloading automatically so post request has chance to complete on Firefox
+        //         if (convo_name === "") {
+        //             alert("Please enter a conversation name!")
+        //         } else {
+        //             alert("conversation name:"+ convo_name);
+        //             console.log("Sending conversation:", convo_name);
+        //             axios.post('http://localhost:3000/api/conversations', { convo_name })
+        //                 .then(() => location.reload());
+        //         }
+        //     }
+        //     const deleteConversation = (convo) => {
+        //         axios.delete('http://localhost:3000/api/conversations/' + convo.convo_id)
+        //             .then((response) => {
+        //                 setConversation(conversations.filter(c => c.convo_id != convo.convo_id))
+        //             })
+        //     }
+        //     return (
+        //         <div>
+        //             <h1>Conversations</h1>
+        //             <ul>
+        //                 {list_of_conversation()}
+        //             </ul>
+        //             <h2>Add a new conversation:</h2>
+        //             <form onSubmit={addConversation}>
+        //                 <input type="text" value={convo_name} onChange={updateConversationnameState}/>
+        //                 <input type="submit" value="Submit"/>
+        //             </form>
+        //         </div>
+        //     )
+        // }
+        // function App() {
+        //     return (
+        //         <div>
+        //             <UserList/>
+        //         </div>
+        //     )
+        // }
+        ReactDOM.render(
+            <UserList />, rootElement
+        )
+    </script>
+</body>
+</html>
